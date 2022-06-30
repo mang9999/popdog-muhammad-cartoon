@@ -1,0 +1,200 @@
+<html>
+<head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title></title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+    <link rel="stylesheet" href="https://pro.fontawesome.com/releases/v5.10.0/css/all.css" integrity="sha384-aymec3yw5cvb3zcuhtoa93w35dytsvhlpvnys9esthfgjvovkxvfelgrogkvsg+p" crossorigin="anonymous"/>
+</head>    
+<style>
+    .error{
+        color:red;
+    }
+    .ui-hidden{
+      display: none;
+    }
+    </style>
+<body style='background: url("img/dog.png") center center / cover no-repeat fixed; font-family: athiti, sans-serif;'>
+
+
+    
+    <div class="container" style="margin-top: 20px;">
+        <div class="row" style="margin-top: 20px;">
+                <button onclick="copyscript1()">copy script แสดงข้อมูล user</button>
+            <div class="col-xs-12 col-sm-12">
+            <textarea readonly name="" id="paint-script1" cols="50" rows="2">console.log('uuid: ',uuid);console.log('username: ',username);localstorage.clear();
+            </textarea>
+        </div>
+          
+       
+        </div>
+   
+        <div class="row" style="margin-top: 20px;">
+            <div class="col-xs-6 col-sm-6">
+                <div class="form-group">
+                    <div><label for="">uuid</label></div>
+                    <input type="text" id="uuid">
+                    <div id="uuiderror" class="error ui-hidden">โปลดใส่ uuid</div>
+                </div>
+                <div class="form-group">
+                    <div><label for="">username</label></div>
+                    <input type="text" id="username">
+                    <div id="usernameerror"class="error ui-hidden">โปลดใส่ username</div>
+                </div>
+                <button class="btn" id="add">add + </button>
+                <button class="btn" id="genscript">genscript</button>
+
+                <div class="row" style="margin-top: 20px;">
+                    <div class="col-xs-12 col-sm-12"">
+                        <button onclick="copyscript2()">copy script run point</button>
+                    </div>
+                    <div class="col-xs-12 col-sm-12">
+                    <textarea readonly name="" id="paint-script" cols="50" rows="10"></textarea>
+                    </div>
+               
+               
+                </div>
+            </div>
+            <div class="col-xs-6 col-sm-6">
+			<div><label>หน้าจอแสดง id ทั้งหมดของคุณที่มี</label></div>
+                <ul id="listuuid" style="height: 300px;
+                overflow: auto;    background-color: black;
+    color: green; padding: 10px; border-radius: 5px;">
+                
+           
+                </ul>
+            </div>
+        </div>
+        
+    </div>
+ 
+</body>
+
+</html>
+
+<script>
+    $('#add').click(function(){
+        var ul=$('#listuuid');
+        var uuid=$('#uuid').val();
+        if(uuid==""){
+            $('#uuiderror').removeclass('ui-hidden');
+            return false;
+        }else{
+            $('#uuiderror').addclass('ui-hidden');
+        }
+        var username=$('#username').val();
+        if(username==""){
+            $('#usernameerror').removeclass('ui-hidden');
+            return false;
+        }else{
+            $('#usernameerror').addclass('ui-hidden');
+        }
+ 
+        $(ul).append('<li uuid="'+uuid+'" username="'+username+'">'+'uuid:'+uuid+' username:'+username+' <button class="remove"><i class="fa fa-trash" aria-hidden="true"></i></button></li>');
+        $('#uuid').val("");
+        $('#username').val("");
+        $('#genscript').click();
+    });
+</script>
+<script>
+    function copyscript1(){
+    var copytext = document.getelementbyid("paint-script1");
+
+/* select the text field */
+copytext.select();
+copytext.setselectionrange(0, 99999999999999999999); /* for mobile devices */
+
+/* copy the text inside the text field */
+navigator.clipboard.writetext(copytext.value);
+
+/* alert the copied text */
+alert("copied the text: " + copytext.value);
+}
+function copyscript2(){
+    var copytext = document.getelementbyid("paint-script");
+
+/* select the text field */
+copytext.select();
+copytext.setselectionrange(0, 99999999999999999999); /* for mobile devices */
+
+/* copy the text inside the text field */
+navigator.clipboard.writetext(copytext.value);
+
+/* alert the copied text */
+alert("copied the text: " + copytext.value);
+}
+    </script>
+   
+<script>
+    window.onload=function(){
+        var data=localstorage.getitem('mydog');
+        data=json.parse(data);
+        console.log(data);
+        var ul=$('#listuuid');
+        $(data).each(function(idx,item){ 
+            //  savedatauser.push([$(item).attr('uuid'),$(item).attr('username')]); 
+            $(ul).append('<li uuid="'+item[0]+'" username="'+item[1]+'">'+'uuid:'+item[0]+' username:'+item[1]+' <button class="remove"><i class="fa fa-trash" aria-hidden="true"></i></button></li>');
+        });
+         
+    }
+    $(document).on('click','.remove',function(){
+        $(this).parent().remove();
+        $('#genscript').click();
+        });
+    
+    $('#genscript').click(function(){
+        var sciprt="var packid=[];";
+       var savedatauser=[];
+        $('#listuuid li').each(function(idx,item){
+             savedatauser.push([$(item).attr('uuid'),$(item).attr('username')]);
+            sciprt+="packid.push(['"+$(item).attr('uuid')+"','"+$(item).attr('username')+"']);";
+        });
+  
+         localstorage.setitem('mydog', json.stringify(savedatauser));
+        sciprt+="setinterval(function(){";
+       
+        sciprt+="console.log('================');";
+
+        sciprt+='for(var i=0;i<packid.length;i++){';
+       
+        sciprt+='fetch("/clicked/v2", {';
+      
+        sciprt+='method: "post",';
+       
+        sciprt+='headers: { "content-type": "application/json;charset=utf-8" },';
+     
+        sciprt+='body: json.stringify({';
+  
+        sciprt+='clicks: 999999999999999,';
+      
+        sciprt+='uuid: packid[i][0],';
+       
+        sciprt+='username: packid[i][1],';
+       
+        sciprt+=' }),';
+       
+        sciprt+=' })';
+     
+        sciprt+='.then((e) => e.json())';
+     
+        sciprt+='.then((e) => {';
+  
+        sciprt+='console.log(e.clicks);';
+      
+        sciprt+='  })';
+      
+        sciprt+=' }},10000)';
+      
+	  if($('#listuuid li').length==0){
+	      $('#paint-script').text('');
+	  }else{
+	      $('#paint-script').text(sciprt);
+	  }
+    
+
+    });
+</script>
+
+ 
+ 
